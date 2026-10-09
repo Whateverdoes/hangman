@@ -1,0 +1,54 @@
+name: Pipeline invariants
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OMP_NUM_THREADS: "2"
+      MKL_NUM_THREADS: "2"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements.txt
+      - name: Run invariant suite
+        run: .venv/bin/python tests/test_pipeline.py
+      - name: Build source package
+        run: bash scripts/package_for_kaggle.sh
+      - name: Check package contents
+        run: |
+          .venv/bin/python - <<'PY'
+          import zipfile
+          from pathlib import PurePosixPath
+          with zipfile.ZipFile('dist/hangman-src.zip') as archive:
+              names = archive.namelist()
+          required = {'src/hangman/model.py', 'scripts/train.py', 'tests/test_pipeline.py',
+                      'LICENSE', 'reports/kaggle_run.md'}
+          assert required <= set(names), 'Source package is incomplete'
+          for name in names:
+              path = PurePosixPath(name)
+              assert 'data' not in path.parts, f'Competition data in package: {name}'
+              excluded = {'AGENTS.md', 'CLAUDE.md', 'CV_HACKATHON.md', 'PUBLISHING.md',
+                          'prepare_github.py', 'followup.sh', 'overnight.sh'}
+              assert path.name not in excluded, f'Local preparation file in package: {name}'
+              assert path.suffix not in {'.pt', '.pth', '.ckpt', '.csv', '.tsv', '.log'}, name
+          print('Source package verified')
+          PY

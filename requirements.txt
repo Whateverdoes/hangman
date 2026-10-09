@@ -1,0 +1,3 @@
+# Kaggle-preinstalled stack only; no external services are contacted.
+torch==2.13.0
+numpy==2.5.2

@@ -1,0 +1,54 @@
+# Competition data — provided by the organizers, never redistributed
+data/*.txt
+
+# Virtualenv
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Artifacts
+*.pt
+checkpoints/
+submission.csv
+experiments/*.jsonl
+experiments/*.tsv
+experiments/*.log
+experiments/states/
+
+# OS
+.DS_Store
+
+# Build output
+dist/
+
+# Local reference docs (published as an Artifact, not part of the submission)
+docs/
+
+# Additional generated checkpoints, labels, and submissions
+*.pth
+*.ckpt
+labels*.tsv
+states.tsv
+submission*.csv
+
+# Local credentials and tool state
+.env
+.env.*
+!.env.example
+.claude/
+.codex/
+.agents/
+
+# Local executed reference notebook; aggregate evidence is in reports/
+/hanngman2.ipynb
+
+# Personal notes and local repository preparation
+/AGENTS.md
+/CLAUDE.md
+/CV_HACKATHON.md
+/PUBLISHING.md
+/scripts/prepare_github.py
+/scripts/followup.sh
+/scripts/overnight.sh
